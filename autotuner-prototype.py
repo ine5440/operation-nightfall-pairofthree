@@ -46,13 +46,14 @@ def compile(compiler, output, files, flags):
     ellapsed = run_cmd(arglist)
 
 
-def tune(filename, level='0', step=8):
+def tune(filename, level='0', step=8, option=''):
     try:
         compile(compiler='gcc',
                 output=filename,
                 files=['mm.c'],
                 flags=[f'-DSTEP={step}',
                        f'-O{level}',
+                       option,
                       ])
     except e:
         print(e)
@@ -66,11 +67,13 @@ def tuner(argv):
 
     levels = ['0', '1', '2', 's', 'fast']
     steps = [2 ** i for i in range(6)]
+    other_options = ['-fopenmp', '-fomit-frame-pointer', '-fno-exceptions', '-march=native']
 
     average = {}
     for level in levels:
         for step in steps:
-            average[(level, step)] = tune(filename, level, step)
+            for option in other_options:
+                average[(level, step, option)] = tune(filename, level, step, option)
 
     print(f'Best options: {min(average, key=average.get)}')
     print(f'Sum of average time: {sum(average.values()):.4f}s')

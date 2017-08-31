@@ -3,31 +3,80 @@
 # Built for INE5540 robot overlords
 
 import subprocess # to run stuff
+import shlex
 import sys # for args, in case you want them
 import time # for time
 
+from subprocess import Popen, PIPE
+from operator import itemgetter
+
+EXECUTIONS = 10
+INPUT_SIZE = 8
+
+def avg(smt):
+    return sum(smt)/len(smt)
+
+def run_cmd(arglist, noprint=False):
+    if not noprint:
+        print(' '.join(arglist))
+
+    begin = time.time()
+    subprocess.check_call(args=arglist, stdout=PIPE)
+    end = time.time()
+
+    return end - begin
+
+
+def run(filename):
+    arglist = shlex.split(f'./{filename} {INPUT_SIZE}')
+    try:
+        average = avg([run_cmd(arglist, noprint=True) for _ in range(EXECUTIONS)])
+        print(f'Happy {EXECUTIONS} execution(s) in average of {average:.4f}s')
+        return average
+    except e:
+        print(e)
+        print('== Sad execution')
+
+
+def compile(compiler, output, files, flags):
+    files = ' '.join(files)
+    flags = ' '.join(flags)
+    command = f'{compiler} -o {output} {files} {flags}'
+    arglist = shlex.split(command)
+    ellapsed = run_cmd(arglist)
+
+
+def tune(filename, level='0', step=8):
+    try:
+        compile(compiler='gcc',
+                output=filename,
+                files=['mm.c'],
+                flags=[f'-DSTEP={step}',
+                       f'-O{level}',
+                      ])
+    except e:
+        print(e)
+        print('== Sad compilation')
+
+    return run(filename)
+
+
 def tuner(argv):
-    exec_file = 'matmult'
-    compilation_line = ['gcc','-o',exec_file,'mm.c']
-    steps = ['-DSTEP=2']
+    filename = 'matmult'
 
-    # Compile code
-    compilation_try = subprocess.run(compilation_line+steps)
-    if (compilation_try.returncode == 0):
-        print("Happy compilation")
-    else:
-        print("Sad compilation")
+    subprocess.run('clear')
 
-    # Run code
-    input_size = str(4)
-    t_begin = time.time() # timed run
-    run_trial = subprocess.run(['./'+exec_file, input_size])
-    t_end = time.time()
-    if (run_trial.returncode == 0):
-        print("Happy execution in "+str(t_end-t_begin))
-    else:
-        print("Sad execution")
+    levels = ['0', '1', '2', 's', 'fast']
+    steps = [2 ** i for i in range(6)]
+
+    average = {}
+    for level in levels:
+        for step in steps:
+            average[(level, step)] = tune(filename, level, step)
+
+    print(f'Best options: {min(average, key=average.get)}')
+    print(f'Sum of average time: {sum(average.values()):.4f}s')
 
 
-if __name__ == "__main__":
-    tuner(sys.argv[1:]) # go auto-tuner
+if __name__ == '__main__':
+    tuner(sys.argv[1:])

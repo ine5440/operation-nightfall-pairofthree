@@ -5,13 +5,13 @@
 #define UPPER_LIMIT 25
 #define LOWER_LIMIT 4
 
-void help (char *);
-void allocate (float **, float **, float **, size_t);
-void initialize (float *, float *, float *, size_t);
-void multiply (float *, float *, float *, size_t);
-void deallocate (float **, float **, float **);
+void help(char *);
+void allocate(float **, float **, float **, size_t);
+void initialize(float *, float *, float *, size_t);
+void multiply(float *, float *, float *, size_t);
+void deallocate(float **, float **, float **);
 
-int main (int argc, char *argv[]){
+int main(int argc, char *argv[]){
 
     /* Input parsing */
     if (argc != 2) { //requires SIZE parameter
@@ -19,7 +19,7 @@ int main (int argc, char *argv[]){
         return -1;
     }
     uint32_t size_power = atoi(argv[1]);
-    if ((size_power > UPPER_LIMIT) || (size_power < LOWER_LIMIT)) {
+    if (size_power > UPPER_LIMIT || size_power < LOWER_LIMIT) {
         help(argv[0]);
         return -2;
     }
@@ -44,19 +44,19 @@ int main (int argc, char *argv[]){
     return 0;
 }
 
-void help (char* program_name ) {
+void help(char* program_name ) {
     printf("Simple matrix multiplication code.\nExpected call:\n");
     printf("'%s SIZE', where SIZE is a value between %d and %d.\n",program_name,LOWER_LIMIT,UPPER_LIMIT);
     printf("The multiplied matrices will be of size 2^SIZE x 2^SIZE\n");
 }
 
-void allocate (float** A, float** B, float** C, size_t side){
+void allocate(float** A, float** B, float** C, size_t side){
     *A = (float*) malloc(side*side*sizeof(float));
     *B = (float*) malloc(side*side*sizeof(float));
     *C = (float*) malloc(side*side*sizeof(float));
 }
 
-void initialize (float * A, float * B, float * C, size_t side){
+void initialize(float * A, float * B, float * C, size_t side){
     size_t i, j;
     for (i = 0; i < side; ++i) {
         for (j = 0; j < side; ++j) {
@@ -68,7 +68,7 @@ void initialize (float * A, float * B, float * C, size_t side){
 
 }
 
-void multiply (float * A, float * B, float * C, size_t side){
+void multiply(float * A, float * B, float * C, size_t side){
     size_t i, j, k, jj, kk;
     for (jj = 0; jj < side; jj += STEP) {
         for (kk = 0; kk < side; kk += STEP) {

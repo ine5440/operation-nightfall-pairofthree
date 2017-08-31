@@ -1,0 +1,2 @@
+all:
+	./autotuner-prototype.py

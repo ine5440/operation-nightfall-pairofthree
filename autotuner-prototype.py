@@ -64,8 +64,6 @@ def tune(filename, level='0', step=8):
 def tuner(argv):
     filename = 'matmult'
 
-    subprocess.run('clear')
-
     levels = ['0', '1', '2', 's', 'fast']
     steps = [2 ** i for i in range(6)]
 
